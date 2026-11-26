@@ -83,11 +83,11 @@ export function createRouter(phone, routes, ctx) {
       });
       texMove(phase === 0 ? prog * 1000 : 1000, t);
     };
-    await tween(0.95, (e) => draw(e, 0), (t) => t * t * (3 - 2 * t));
+    await tween(0.7, (e) => draw(e, 0), (t) => t * t * (3 - 2 * t));
     await swap();
     // leaving: the band's upper edge (also wavy) rolls down and out
     const t1 = performance.now() / 1000;
-    await tween(1.05, (e) => {
+    await tween(0.75, (e) => {
       const t = performance.now() / 1000 - t0;
       WAVES.slice().reverse().forEach((w, i) => {
         const p = Math.min(Math.max((e - i * 0.1) / (1 - 0.2), 0), 1);

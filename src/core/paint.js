@@ -6,7 +6,7 @@
 // no JS), plus a moving sheen, so the paint "breathes" and shimmers.
 // Cost: one path rebuild per mass per frame; no SVG filters on moving shapes.
 
-import { onFrame, motion } from './loop.js';
+import { onFrame, motion, PAINT_FPS } from './loop.js';
 import { svg } from './dom.js';
 
 let uid = 0;
@@ -167,11 +167,13 @@ export function morpher(contours, { amp = 6, speed = 0.2, seed = 0, pin = null, 
 /** Shared <defs> for a screen svg: textures (drifting), sheen gradient. */
 export function paintDefs(defs) {
   const id = `t${++uid}`;
+  const drift = []; // lite mode: patterns are moved from JS at the paint frame rate
   const mk = (pid, href, size, dur, dx, dy) => {
     const pat = svg('pattern', { id: pid, patternUnits: 'userSpaceOnUse', width: size, height: size });
     pat.appendChild(svg('image', { href, width: size, height: size, preserveAspectRatio: 'none' }));
     if (!motion.reduced) {
-      pat.appendChild(svg('animateTransform', {
+      if (motion.lite) drift.push({ pat, dur, dx, dy });
+      else pat.appendChild(svg('animateTransform', {
         attributeName: 'patternTransform', type: 'translate',
         values: `0 0; ${dx} ${dy}; ${dx * 0.3} ${dy * 1.4}; 0 0`, dur: `${dur}s`, repeatCount: 'indefinite',
       }));
@@ -186,12 +188,26 @@ export function paintDefs(defs) {
   const g = svg('linearGradient', { id: `${id}-sheen`, x1: 0, y1: 0, x2: 1, y2: 1, gradientUnits: 'objectBoundingBox' });
   [['0', 0], ['0.42', 0], ['0.5', 0.55], ['0.58', 0], ['1', 0]].forEach(([o, a]) =>
     g.appendChild(svg('stop', { offset: o, 'stop-color': '#7FA2FF', 'stop-opacity': a })));
-  if (!motion.reduced) {
+  if (!motion.reduced && !motion.lite) {
     g.appendChild(svg('animateTransform', {
       attributeName: 'gradientTransform', type: 'translate', values: '-1 -1; 1 1', dur: '9s', repeatCount: 'indefinite',
     }));
   }
   defs.appendChild(g);
+  if (drift.length) {
+    // same keyframes as the SMIL version (0 → d → 0.3d,1.4d → 0), smoothly interpolated
+    const K = [[0, 0], [1, 1], [0.3, 1.4], [0, 0]];
+    let seen = false;
+    const off = onFrame((t) => {
+      if (!defs.isConnected) { if (seen) off(); return; }
+      seen = true;
+      for (const d of drift) {
+        const u = ((t / d.dur) % 1) * 3, i = Math.floor(u), f = u - i, e = f * f * (3 - 2 * f);
+        const x = (K[i][0] + (K[i + 1][0] - K[i][0]) * e) * d.dx, y = (K[i][1] + (K[i + 1][1] - K[i][1]) * e) * d.dy;
+        d.pat.setAttribute('patternTransform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      }
+    }, { fps: PAINT_FPS });
+  }
   return id;
 }
 
@@ -214,8 +230,10 @@ export function addPaint(root, defs, texId, opts) {
     // second texture layer drifting the other way = marbling that never repeats
     // water light: two caustic nets drifting against each other + a travelling sheen
     g.appendChild(svg('use', { href: `#${id}`, fill: `url(#${texId}-caus)`, opacity: 0.34 }));
-    g.appendChild(svg('use', { href: `#${id}`, fill: `url(#${texId}-caus2)`, opacity: 0.2 }));
-    g.appendChild(svg('use', { href: `#${id}`, fill: `url(#${texId}-sheen)`, opacity: 0.2 }));
+    if (!motion.lite) {
+      g.appendChild(svg('use', { href: `#${id}`, fill: `url(#${texId}-caus2)`, opacity: 0.2 }));
+      g.appendChild(svg('use', { href: `#${id}`, fill: `url(#${texId}-sheen)`, opacity: 0.2 }));
+    }
   }
   const inner = svg('g', { 'clip-path': `url(#${id}-clip)` });
   // wet darker edge (inner half of a stroke), cheap replacement for an erode filter
@@ -255,7 +273,7 @@ export function addPaint(root, defs, texId, opts) {
       glaze.twin.setAttribute('d', pd);
       listeners.forEach((f) => f(pd));
     }
-  }, { fps: 30 });
+  }, { fps: PAINT_FPS });
   return {
     id, clipId: `${id}-clip`, group: g,
     d: () => current,
@@ -286,6 +304,6 @@ export function addPhotoWindow(root, defs, { contours, href, box, amp = 2.6, see
   root.appendChild(g);
   const m = morpher(contours, { amp, seed, speed: 0.3, obstacles, calm });
   p.setAttribute('d', m(0));
-  const off = onFrame((t) => p.setAttribute('d', m(t)), { fps: 30 });
+  const off = onFrame((t) => p.setAttribute('d', m(t)), { fps: PAINT_FPS });
   return { el: g, img, pathId: `${id}-path`, stop: off };
 }

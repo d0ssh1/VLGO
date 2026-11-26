@@ -62,3 +62,8 @@ img { display: block; }
 /* real phone: no frame, no fake status bar; page background follows the screen */
 html.on-phone, html.on-phone body { background: var(--paper); }
 .stage.is-phone .statusbar { display: none; }
+
+/* phone: the page itself may scroll a little on short in-app browsers */
+html.on-phone body { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+html.on-phone .stage { position: relative; inset: auto; width: 100%; overflow: hidden; justify-content: flex-start; align-items: flex-start; }
+html.on-phone .stage.is-phone .phone { transform-origin: top left; }

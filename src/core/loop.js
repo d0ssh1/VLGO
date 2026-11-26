@@ -11,7 +11,12 @@ let running = false;
 
 export const motion = {
   reduced: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  // phones / weak devices: same design and motion, but every animated SVG layer is
+  // redrawn at a shared lower rate and the most expensive overlays are skipped
+  lite: (window.matchMedia?.('(pointer: coarse)').matches ?? false) || (navigator.hardwareConcurrency || 8) <= 4 || /[?&]lite/.test(location.search),
 };
+/** frame rate for the living paint */
+export const PAINT_FPS = motion.lite ? 20 : 30;
 window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', (e) => {
   motion.reduced = e.matches;
 });

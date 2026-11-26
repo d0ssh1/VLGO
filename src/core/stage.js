@@ -25,9 +25,17 @@ export function createStage(host) {
     const CUT = isPhone ? 44 : 0; // design status bar height, hidden on phones
     let s, mt = 0;
     if (isPhone) {
-      s = Math.min(vw / W, vh / (H - CUT));
-      mt = Math.max(0, (vh - (H - CUT) * s) / 2) - CUT * s;
+      // always the full width (no side fields); on a short screen (in-app browsers
+      // like Telegram) the page scrolls the remaining few dozen px
+      // shrink at most 7 % to fit a short screen (thin side margins in the screen's own
+      // colour, the paint keeps bleeding into them); anything still missing scrolls
+      s = Math.max(vw / W * 0.93, Math.min(vw / W, vh / (H - CUT)));
+      mt = -CUT * s;
+      const need = (H - CUT) * s;
+      phone.style.marginLeft = `${(vw - W * s) / 2}px`;
+      stage.style.height = `${Math.max(need, vh)}px`;
     } else {
+      stage.style.height = ''; phone.style.marginLeft = '';
       s = Math.min((vh - 48) / H, (vw - 48) / W, 1.15);
     }
     phone.style.setProperty('--s', s.toFixed(4));
