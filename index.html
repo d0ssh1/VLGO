@@ -9,6 +9,10 @@
   <meta name="description" content="VLGO: необычные места Владивостока от своих и общий свайп с друзьями.">
 </head>
 <body>
+  <script>
+    // GitHub Pages serves the repository as is: open the built prototype from dist/
+    if (/github\.io$/.test(location.hostname) && !/\/dist\//.test(location.pathname)) location.replace('dist/' + location.search + location.hash);
+  </script>
   <div id="app"></div>
   <script type="module" src="/src/main.js"></script>
 </body>
