@@ -355,3 +355,14 @@
 
 .fdrop.more { background: var(--ink); color: #fff; font: 800 17px var(--font); letter-spacing: -0.02em; }
 .fdrop.more.new { animation: pop 460ms var(--ease-back) both; }
+
+/* Сошлись v2 */
+.scr-match.v2 .art { position: absolute; inset: 0; }
+.scr-match.v2 .m-who { position: absolute; left: 24px; top: 208px; display: flex; align-items: center; gap: 11px; font: 500 14px var(--font); color: #2A2F3B; }
+.scr-match.v2 .m-av { display: flex; }
+.scr-match.v2 .m-av i { width: 36px; height: 36px; border-radius: 50%; margin-left: -2px; font: 700 11px/36px var(--font); font-style: normal; text-align: center; color: #fff; background: var(--blue, #1E4BFF); box-shadow: 0 0 0 2.5px var(--paper); }
+.scr-match.v2 .m-av i:first-child { margin-left: 0; }
+.scr-match.v2 .m-av i:nth-child(even) { background: var(--ink); }
+.scr-match.v2 .m-name { top: 600px; font: 700 22px/1.1 var(--font); }
+.scr-match.v2 .alt { top: 674px; width: 108px; height: 68px; border-radius: 16px; }
+.scr-swipe .sw-meta, .scr-swipe .sw-friends { transition: top 420ms var(--ease-out); }

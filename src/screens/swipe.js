@@ -5,17 +5,14 @@ import { h, svg } from '../core/dom.js';
 import { liquidReveal } from '../core/reveal.js';
 import { tween, easeOutCubic, easeOutBack, motion } from '../core/loop.js';
 import { flow } from '../core/paint.js';
-import { buildArt, buildLive, fitToWord } from './art.js';
-import { wordTop } from '../ui/giant.js';
+import { buildBlobCard, BLOB_BASES } from '../ui/blobcard.js';
 import { originOf, toast } from '../core/util.js';
 import { backBtn } from '../ui/kit.js';
-import SHAPES from '../data/shapes.json';
 import { PLACES } from '../data/content.js';
 
 const DECK = ['svet', 'pena', 'krab', 'holodilnik', 'zarya', 'nochgorod', 'zvuk', 'mayak', 'kvartira'];
 
 export function swipe(ctx) {
-  const spec = SHAPES.swipe;
   const el = h('section', { class: 'screen scr-swipe' });
   const stack = h('div', { class: 'deck' });
   el.appendChild(stack);
@@ -35,6 +32,7 @@ export function swipe(ctx) {
   const past = [];
   const meta = el.querySelector('.sw-meta');
   const stamp = el.querySelector('.stamp');
+  const friends = el.querySelector('.sw-friends');
 
   // all card photos are decoded up-front, so a photo never "loads" on screen
   const cache = {};
@@ -54,22 +52,12 @@ export function swipe(ctx) {
   let next = null, lastKind = null;
   function makeCard(i) {
     const place = PLACES.find((p) => p.id === DECK[i % DECK.length]);
-    // a card composition (never the same twice in a row), fitted to this name:
-    // the picture always ends just above the word, however many lines it takes
-    const pool = SHAPES.cards.map((c, j) => j).filter((j) => SHAPES.cards[j].kind !== lastKind);
+    // one of the approved compositions (never the same twice in a row), laid out for this name
+    const pool = BLOB_BASES.map((c, j) => j).filter((j) => BLOB_BASES[j].kind !== lastKind);
     const forced = new URLSearchParams(location.search).get('base');
-    const bi = forced != null ? +forced : pool[Math.floor(Math.random() * pool.length)];
-    const card0 = SHAPES.cards[bi];
-    lastKind = card0.kind;
-    const w0 = card0.words[0];
-    const wt = wordTop(place.word, { x: w0.x, y: w0.y, ang: w0.ang * 0.65, size: w0.size, min: w0.min, rightPad: w0.rightPad });
-    const base = fitToWord(card0, wt.top, SHAPES.cardsRef.top);
-    const ph = base.photos.map((p) => ({ ...p, img: place.img }));
-    // the paint near the name holds still (it breathes freely higher up), so its edge
-    // never drifts onto the letters
-    const ta = Math.tan((9 * 0.65 * Math.PI) / 180);
-    const calm = (x, y) => { const d = wt.top - (y + (x - 20) * ta); return d > 110 ? 1 : d < 0 ? 0.12 : 0.12 + 0.88 * (d / 110); };
-    const art = buildArt({ ...base, photos: ph, stars: [] }, { amp: 8, wordText: place.word, warp: 'none', calm, rim: false });
+    const bi = forced != null ? +forced % BLOB_BASES.length : pool[Math.floor(Math.random() * pool.length)];
+    lastKind = BLOB_BASES[bi].kind;
+    const art = buildBlobCard(BLOB_BASES[bi], place.word, place.img);
     const wrap = h('div', { class: 'card-art quick tide' });
     wrap.style.visibility = 'hidden';
     wrap.appendChild(art.root);
@@ -78,13 +66,13 @@ export function swipe(ctx) {
     R.appendChild(body);
     body.setAttribute('opacity', '0');
     stack.insertBefore(wrap, stack.firstChild);
-    return { i, wrap, art, place, R, body, box: base.photos[0].box };
+    return { i, wrap, art, place, R, body, box: art.box, lay: art.layout };
   }
   function showCard({ under = false } = {}) {
     if (next && next.i !== idx) { next.art.stop(); next.wrap.remove(); next = null; }
     const c = next || makeCard(idx);
     next = null;
-    const { wrap, art, place, R, body, box } = c;
+    const { wrap, art, place, R, body, box, lay } = c;
     if (!under) stack.appendChild(wrap); // on top (first card / undo)
     wrap.style.visibility = '';
     body.removeAttribute('opacity');
@@ -103,6 +91,7 @@ export function swipe(ctx) {
     if (idx) tween(1.4, (e) => { flow.gain = 1 + 1.4 * (1 - e); }, easeOutCubic);
     const setMeta = () => {
       meta.innerHTML = `<b>${place.name}</b> · ${place.area}`;
+      meta.style.top = `${lay.metaTop}px`; friends.style.top = `${lay.friendsTop}px`;
       meta.classList.remove('swap'); void meta.offsetWidth; meta.classList.add('swap');
     };
     if (under) { meta.classList.add('out'); setTimeout(() => { meta.classList.remove('out'); setMeta(); }, 300); } else setMeta();
