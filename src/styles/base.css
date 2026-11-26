@@ -64,6 +64,15 @@ html.on-phone, html.on-phone body { background: var(--paper); }
 .stage.is-phone .statusbar { display: none; }
 
 /* phone: the page itself may scroll a little on short in-app browsers */
-html.on-phone body { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+html.on-phone body { overflow: hidden; }
 html.on-phone .stage { position: relative; inset: auto; width: 100%; overflow: hidden; justify-content: flex-start; align-items: flex-start; }
 html.on-phone .stage.is-phone .phone { transform-origin: top left; }
+
+/* top crop on short phones: the screen moves up, its top controls stay put */
+.stage.is-phone .screen { translate: 0 calc(var(--crop, 0) * -1px); }
+.stage.is-phone .screen .icon-btn, .stage.is-phone .scr-map .search, .stage.is-phone .scr-map .map-chips { translate: 0 calc(var(--crop, 0) * 1px); }
+.stage.is-phone .toast { translate: 0 calc(var(--crop, 0) * 1px); }
+
+.flood-lite { position: absolute; inset: 0; z-index: 70; display: none; pointer-events: none; }
+.flood-lite .fl-layer { position: absolute; left: -100px; top: 0; width: 590px; height: 1120px; will-change: transform; transform: translate3d(0, -1120px, 0); }
+.flood-lite svg { display: block; overflow: visible; }

@@ -75,5 +75,5 @@ export function map(ctx, { focus } = {}) {
     const more = e.target.closest('.more');
     if (more) ctx.router.go('place', { id: more.dataset.place || 'millionka' }, { transition: 'flood', origin: originOf(ctx, more) });
   });
-  return { el, destroy: art.stop, flow: 0 };
+  return { el, crop: 150, destroy: art.stop, flow: 0 };
 }

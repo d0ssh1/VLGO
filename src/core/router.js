@@ -61,7 +61,54 @@ export function createRouter(phone, routes, ctx) {
     return [d, rim];
   };
 
+  // Lite flood (phones): the same three waves, but each is a pre-drawn layer
+  // (wavy front top and bottom, texture inside) that the GPU only slides —
+  // no per-frame path rebuild or repaint, so it stays smooth on mid-range Android.
+  let lite = null;
+  function buildLite() {
+    const wrap = document.createElement('div');
+    wrap.className = 'flood-lite';
+    const wave = (k, amp, ph) => {
+      let top = '', bot = '';
+      for (let x = -140; x <= 530; x += 10) {
+        const f = (o) => Math.sin(x / 390 * Math.PI * k + ph + o) * amp + Math.sin(x / 390 * Math.PI * k * 2.3 - ph) * amp * 0.35;
+        top += `${x === -140 ? 'M' : 'L'}${x} ${(60 + f(0)).toFixed(1)}`;
+        bot = `L${x} ${(1060 + f(1.3)).toFixed(1)}` + bot;
+      }
+      return top + bot.replace(/^L/, 'L') + 'Z';
+    };
+    const L = WAVES.map((w, i) => {
+      const el = document.createElement('div');
+      el.className = 'fl-layer';
+      el.innerHTML = `<svg width="590" height="1120" viewBox="-100 0 590 1120"><defs>
+        <pattern id="flt${i}" patternUnits="userSpaceOnUse" width="512" height="512"><image href="assets/tex/paint_tex.jpg" width="512" height="512"/></pattern>
+        <pattern id="flc${i}" patternUnits="userSpaceOnUse" width="300" height="300"><image href="assets/tex/caustic.png" width="300" height="300"/></pattern></defs>
+        <path d="${wave(w.k, w.amp, i * 1.7)}" fill="${w.caus ? `url(#flt${i})` : w.fill}" opacity="${w.op}"/>
+        ${w.caus ? `<path d="${wave(w.k, w.amp, i * 1.7)}" fill="url(#flc${i})" opacity="0.35"/>` : ''}</svg>`;
+      wrap.appendChild(el);
+      return { el, lag: w.lag };
+    });
+    phone.appendChild(wrap);
+    return { wrap, L };
+  }
+  async function floodLite(swap) {
+    lite ??= buildLite();
+    lite.wrap.style.display = 'block';
+    const pos = (p) => -1120 + p * 1060;   // layer top: above the screen → covering → below
+    await tween(0.62, (e) => lite.L.forEach((l, i) => {
+      const p = Math.min(Math.max((e - l.lag) / (1 - l.lag), 0), 1);
+      l.el.style.transform = `translate3d(0, ${pos(p).toFixed(1)}px, 0)`;
+    }), (t) => t * t * (3 - 2 * t));
+    await swap();
+    await tween(0.66, (e) => lite.L.forEach((l, i) => {
+      const p = Math.min(Math.max((e - (2 - i) * 0.1) / 0.8, 0), 1);
+      l.el.style.transform = `translate3d(0, ${(-60 + p * 1000).toFixed(1)}px, 0)`;
+    }), easeInOutCubic);
+    lite.wrap.style.display = 'none';
+  }
+
   async function flood(origin, swap) {
+    if (motion.lite) return floodLite(swap);
     over.style.display = 'block';
     const t0 = performance.now() / 1000;
     const draw = (prog, phase) => {
@@ -137,6 +184,7 @@ export function createRouter(phone, routes, ctx) {
 
     const mount = async (enter = true) => {
       screen.el.classList.add('screen-in');
+      phone.fitFor?.(screen.crop ?? 0);
       layer.appendChild(screen.el);
       ctx.statusbar?.(screen.dark, screen.sbPaint);
       flow.gain = screen.flow ?? 1;

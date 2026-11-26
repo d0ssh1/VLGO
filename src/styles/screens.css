@@ -4,7 +4,7 @@
 .scr-onboard .lg-on, .scr-onboard .lg-no { width: 18px; height: 18px; border-radius: 7px; flex: none; }
 .scr-onboard .lg-on { background: var(--ui-blue); }
 .scr-onboard .lg-no { border: 1.5px dashed rgba(14, 18, 29, 0.4); margin-left: 14px; }
-.scr-onboard .col-head { position: absolute; top: 280px; font: 600 12px var(--font); color: var(--muted); }
+.scr-onboard .col-head { position: absolute; top: 280px; text-align: center; font: 600 12px var(--font); color: var(--muted); }
 .tile {
   position: absolute; height: 80px; border-radius: var(--r-tile);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;

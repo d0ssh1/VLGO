@@ -36,7 +36,7 @@ export function profile(ctx) {
     if (e.target.closest('.company')) ctx.router.go('match', {}, { transition: 'push' });
   });
   return {
-    el,
+    el, crop: 30,
     enter() { setTimeout(() => el.querySelectorAll('[data-n]').forEach((b) => countUp(b, +b.dataset.n)), 450); },
     destroy: () => { offL(); art.stop(); },
     sbPaint: true,

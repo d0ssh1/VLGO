@@ -56,5 +56,5 @@ export function vote(ctx) {
     await new Promise((r) => setTimeout(r, 650));
     ctx.router.go('match', {}, { transition: 'flood', origin: { x: GHOST[0], y: GHOST[1] } });
   });
-  return { el, destroy: () => { rl.stop(); art.stop(); }, dark: true, flow: 0.25 };
+  return { el, crop: 20, destroy: () => { rl.stop(); art.stop(); }, dark: true, flow: 0.25 };
 }

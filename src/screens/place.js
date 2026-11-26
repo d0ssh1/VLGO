@@ -54,5 +54,5 @@ export function place(ctx, { id = 'tobizina' } = {}) {
     if (a?.dataset.action === 'company') ctx.router.go('create', { place: p.id }, { transition: 'flood', origin: originOf(ctx, a) });
     if (a?.dataset.action === 'route') ctx.router.go('map', { focus: p.id }, { transition: 'push' });
   });
-  return { el, destroy: art.stop };
+  return { el, crop: 150, destroy: art.stop };
 }

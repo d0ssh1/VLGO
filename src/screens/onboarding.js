@@ -48,7 +48,7 @@ export function onboarding(ctx, { intro = false } = {}) {
   const tw = (342 - 16) / 3;
   const grid = INTERESTS.map((g, ci) => {
     const x = 24 + ci * (tw + 8);
-    const head = `<div class="col-head rise" style="left:${(x + 4).toFixed(1)}px;--d:${ci}">${g.title}</div>`;
+    const head = `<div class="col-head rise" style="left:${x.toFixed(1)}px;width:${tw.toFixed(1)}px;--d:${ci}">${g.title}</div>`;
     const tiles = g.items.map((it, ri) =>
       `<button class="tile pop" data-id="${it.id}" style="left:${x.toFixed(1)}px;top:${302 + ri * 88}px;width:${tw.toFixed(1)}px;--d:${ci + ri * 3}">
         <span class="ic">${icon(it.icon, 'currentColor', 24)}</span><span class="tl">${it.label}</span><span class="x" aria-hidden="true">
@@ -179,7 +179,7 @@ export function onboarding(ctx, { intro = false } = {}) {
         d += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
       }
       poolPath.setAttribute('d', d + 'Z');
-    });
+    }, { fps: motion.lite ? 30 : 0 });
     stopIntro = offPool;
 
     await wait(200);
@@ -225,7 +225,8 @@ export function onboarding(ctx, { intro = false } = {}) {
     [...R0.childNodes].forEach((n) => { if (n.nodeName !== 'defs') body.appendChild(n); });
     R0.appendChild(body);
     el.classList.add('flooding');
-    liquidReveal(R0, body, { cx: 360, cy: 40, maxR: 980, dur: 1.2, ease: 'flow', r0: 30 });
+    if (motion.lite) { R0.style.opacity = '0'; R0.style.transition = 'opacity 700ms ease'; requestAnimationFrame(() => { R0.style.opacity = '1'; }); }
+    else liquidReveal(R0, body, { cx: 360, cy: 40, maxR: 980, dur: 1.2, ease: 'flow', r0: 30 });
     await tween(0.75, (e) => {
       const s = S + (1 - S) * e;
       move.style.transform = `translate(${ix * (1 - e)}px, ${iy * (1 - e)}px) scale(${s})`;

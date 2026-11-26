@@ -3,7 +3,7 @@
 
 import { h, svg } from '../core/dom.js';
 import { liquidReveal } from '../core/reveal.js';
-import { tween, easeOutCubic, easeOutBack } from '../core/loop.js';
+import { tween, easeOutCubic, easeOutBack, motion } from '../core/loop.js';
 import { flow } from '../core/paint.js';
 import { buildArt, buildLive, fitToWord } from './art.js';
 import { wordTop } from '../ui/giant.js';
@@ -90,9 +90,15 @@ export function swipe(ctx) {
     body.removeAttribute('opacity');
     const [bx, by, bw, bh] = box, pcx = bx + bw / 2, pcy = by + bh / 2;
     const d0 = idx || under ? 0 : 0.3;
-    liquidReveal(R, body, { cx: pcx, cy: pcy, maxR: 640, dur: 1.0, delay: d0, edgeClip: art.paints[0]?.clipId, ease: 'flow', r0: 40 });
-    const win = R.querySelector('.photo-window');
-    if (win) liquidReveal(R, win, { cx: pcx + 10, cy: pcy - 6, maxR: Math.max(bw, bh) * 0.85, dur: 0.9, delay: d0 + 0.38, ease: 'quad' });
+    if (motion.lite) {
+      // phones: the card rises out of the water as one GPU layer (no per-frame masks)
+      wrap.animate([{ opacity: 0, transform: 'translateY(26px) scale(0.94)' }, { opacity: 1, transform: 'none' }],
+        { duration: 520, delay: d0 * 1000, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+    } else {
+      liquidReveal(R, body, { cx: pcx, cy: pcy, maxR: 640, dur: 1.0, delay: d0, edgeClip: art.paints[0]?.clipId, ease: 'flow', r0: 40 });
+      const win = R.querySelector('.photo-window');
+      if (win) liquidReveal(R, win, { cx: pcx + 10, cy: pcy - 6, maxR: Math.max(bw, bh) * 0.85, dur: 0.9, delay: d0 + 0.38, ease: 'quad' });
+    }
     requestAnimationFrame(() => wrap.classList.add('screen-in'));
     if (idx) tween(1.4, (e) => { flow.gain = 1 + 1.4 * (1 - e); }, easeOutCubic);
     const setMeta = () => {
@@ -222,5 +228,5 @@ export function swipe(ctx) {
   });
 
   showCard();
-  return { el, destroy: () => { card?.art.stop(); next?.art.stop(); } };
+  return { el, crop: 56, destroy: () => { card?.art.stop(); next?.art.stop(); } };
 }

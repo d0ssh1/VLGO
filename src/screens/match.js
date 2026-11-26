@@ -37,5 +37,5 @@ export function match(ctx) {
     const r = e.target.closest('[data-action="route"]');
     if (r) ctx.router.go('map', { focus: 'mayak' }, { transition: 'flood', origin: originOf(ctx, r) });
   });
-  return { el, destroy: () => { off(); art.stop(); } };
+  return { el, crop: 10, destroy: () => { off(); art.stop(); } };
 }

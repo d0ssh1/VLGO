@@ -29,5 +29,5 @@ export function saved(ctx) {
     const t = e.target.closest('[data-place]');
     if (t) ctx.router.go('place', { id: t.dataset.place }, { transition: 'flood', origin: originOf(ctx, t) });
   });
-  return { el, destroy: art.stop, sbPaint: true };
+  return { el, crop: 40, destroy: art.stop, sbPaint: true };
 }
