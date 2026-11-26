@@ -1,0 +1,29 @@
+/* VLGO design tokens — single source for colours, type, radii, motion. */
+:root {
+  --paper: #F4ECE2;
+  --card: #F8F1E7;
+  --card-2: #F7EFE5;
+  --ink: #0E121D;
+  --muted: #5E6270;
+  --line: rgba(60, 40, 20, 0.10);
+  --paint: #0535D3;
+  --ui-blue: #1A47E0;
+  --lime: #DCF24F;
+  --night: #0B1C30;
+  --slate: #202D3E;
+
+  --font: 'Inter', system-ui, sans-serif;
+  --font-giant: 'Inter Tight', 'Inter', sans-serif;
+
+  --m: 24px;               /* content margin */
+  --btn-h: 56px;
+  --r-pill: 999px;
+  --r-tile: 26px;
+
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-back: cubic-bezier(.34, 1.56, .64, 1);
+  --t-fast: 160ms;
+  --t-mid: 420ms;
+  --t-slow: 820ms;
+}

@@ -1,0 +1,49 @@
+/* Enter choreography shared by all screens.
+   A screen gets .screen-in when mounted; children animate with a stagger (--i). */
+
+.screen-in .paint-in {
+  transform-box: view-box; transform-origin: 70% 30%;
+  animation: paint-in 1100ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+@keyframes paint-in {
+  0% { clip-path: circle(0% at 62% 36%); transform: scale(0.94); }
+  100% { clip-path: circle(140% at 62% 36%); transform: none; }
+}
+
+.screen-in .photo-in { animation: photo-in 500ms var(--ease-out) 150ms both; }
+@keyframes photo-in { from { opacity: 0; } to { opacity: 1; } }
+
+.kenburns { transform-box: fill-box; transform-origin: 50% 60%; animation: kb 22s ease-in-out infinite alternate; }
+@keyframes kb { from { transform: scale(1.0); } to { transform: scale(1.07) translate(-1.5%, 1%); } }
+
+.screen-in .gw-line {
+  animation: word-in 900ms var(--ease-out) both;
+  animation-delay: calc(260ms + var(--i, 0) * 110ms);
+}
+@keyframes word-in {
+  0% { transform: translate(-36px, 24px) skewX(8deg); opacity: 0; }
+  70% { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+.screen-in .star { animation: star-in 900ms var(--ease-back) 420ms both, star-idle 9s var(--ease-in-out) 1.4s infinite; }
+@keyframes star-in { from { transform: scale(0) rotate(-120deg); } to { transform: none; } }
+
+.screen-in .rise { animation: rise 700ms var(--ease-out) both; animation-delay: calc(380ms + var(--d, 0) * 70ms); }
+@keyframes rise { from { transform: translateY(22px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.screen-in .pop { animation: pop 560ms var(--ease-back) both; animation-delay: calc(420ms + var(--d, 0) * 55ms); }
+@keyframes pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.screen-in .tabbar { animation: rise 700ms var(--ease-out) 300ms both; }
+
+/* router overlay */
+.flood { position: absolute; inset: 0; z-index: 40; display: none; pointer-events: none; }
+.screens { position: absolute; inset: 0; }
+.screens > .screen { will-change: transform; }
+
+/* paper knockout fades in only once the paint has spread (no cream-on-cream letters) */
+.screen-in .knock { animation: knock-in 400ms ease-out 1150ms both; }
+.card-art.quick.screen-in .knock { animation-delay: 700ms; }
+@keyframes knock-in { from { opacity: 0; } to { opacity: 1; } }
